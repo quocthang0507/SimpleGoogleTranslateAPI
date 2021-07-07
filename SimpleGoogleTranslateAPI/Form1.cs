@@ -50,6 +50,14 @@ namespace SimpleGoogleTranslateAPI
 			target_language = cbxDestLang.SelectedValue.ToString();
 		}
 
+		private void cbxAutoTranslate_CheckedChanged(object sender, EventArgs e)
+		{
+			if (cbxAutoTranslate.Checked)
+				timerAutoTranslate.Start();
+			else
+				timerAutoTranslate.Stop();
+		}
+
 		// Set delay time for automatically translating
 		private void timerAutoTranslate_Tick(object sender, EventArgs e)
 		{
@@ -97,22 +105,35 @@ namespace SimpleGoogleTranslateAPI
 				//watch.Start();
 
 				string url = $"https://translate.googleapis.com/translate_a/single?client=gtx&sl={source_language}&tl={target_language}&dt=t&q={Uri.EscapeUriString(text)}";
-				string result = await httpClient.GetStringAsync(url);
-				var jsonData = JsonConvert.DeserializeObject<List<dynamic>>(result);
-				var translationItems = jsonData[0];
-				string translation = "";
-				foreach (object item in translationItems)
+				try
 				{
-					IEnumerable translationLineObject = item as IEnumerable;
-					IEnumerator translationLineString = translationLineObject.GetEnumerator();
-					translationLineString.MoveNext();
-					translation += string.Format(" {0}", Convert.ToString(translationLineString.Current));
-				}
-				if (translation.Length > 1) { translation = translation[1..]; };
+					string result = await httpClient.GetStringAsync(url);
+					string translation = "";
 
-				watch.Stop();
-				lblStatus.Text = $"Thời gian phản hồi là {watch.ElapsedMilliseconds} mili giây";
-				return translation;
+					var jsonData = JsonConvert.DeserializeObject<List<dynamic>>(result);
+					var translationItems = jsonData[0];
+					foreach (object item in translationItems)
+					{
+						IEnumerable translationLineObject = item as IEnumerable;
+						IEnumerator translationLineString = translationLineObject.GetEnumerator();
+						translationLineString.MoveNext();
+						translation += string.Format(" {0}", Convert.ToString(translationLineString.Current));
+					}
+					if (translation.Length > 1) { translation = translation[1..]; };
+
+					watch.Stop();
+					lblStatus.Text = $"Thời gian phản hồi là {watch.ElapsedMilliseconds} mili giây";
+					return translation;
+				}
+				catch(HttpRequestException e)
+				{
+					cbxAutoTranslate.Checked = false;
+					MessageBox.Show(e.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+				catch (Exception e)
+				{
+					MessageBox.Show(e.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
 			}
 			return string.Empty;
 		}

@@ -259,6 +259,7 @@ namespace SimpleGoogleTranslateAPI
 			this.cbxAutoTranslate.TabIndex = 3;
 			this.cbxAutoTranslate.Text = "Tự động dịch";
 			this.cbxAutoTranslate.UseVisualStyleBackColor = true;
+			this.cbxAutoTranslate.CheckedChanged += new System.EventHandler(this.cbxAutoTranslate_CheckedChanged);
 			// 
 			// statusStrip
 			// 
@@ -280,7 +281,7 @@ namespace SimpleGoogleTranslateAPI
 			// 
 			// timerAutoTranslate
 			// 
-			this.timerAutoTranslate.Interval = 1000;
+			this.timerAutoTranslate.Interval = 1500;
 			this.timerAutoTranslate.Tick += new System.EventHandler(this.timerAutoTranslate_Tick);
 			// 
 			// Form1
